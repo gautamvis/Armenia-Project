@@ -1,0 +1,36 @@
+Objective: write software to automate the process of scraping web articles relating to governmental distribution of public goods in Armenia. Categorize these articles according to the provided labels (ex. education related, army related, etc.) or mark them as irrelevant. Also attempt to parse metadata from the article, such as topic, date, etc.
+
+
+Tools:
+Python 2.7.15 - Libraries used: sklearn(SVM implementation), pandas(parsing CSV data), numpy(format data s.t. it can be used with sklearn), bs4, requests, selenium
+Chromedriver
+
+-------------------------------------------------------------------------------
+Done so far:
+
+	Obtain data from Jane in form of excel sheet with article info, text, label
+
+	Find a way to preprocess text
+
+	Determine a machine learning method that would work well in this process - bag of words model Linear SVM classifier
+
+	Use school dataset to begin with 
+
+	Given articles returned using the 'school' keyword, write linear classifier to predict only whether the article is relevant to schools or not
+
+-------------------------------------------------------------------------------
+TODO:
+
+	classify articles based on all labels, instead of just relevancy
+
+	scrape data from armenpress
+
+	run trained classifier on this data to determine relevant articles
+
+	find accuracy
+
+	optimize
+
+	repeat process for russian articles
+
+	repeat process for armenian articles
