@@ -21,6 +21,15 @@ def article_retreive(url):
     except:
         return None
 
+def article_retreive_date(url):
+    article = Article(url)
+    try:
+        article.download()
+        article.parse()
+        return article.publish_date
+    except:
+        return None
+
 
 def newspaper_content(url):
     article = article_retreive(url)
