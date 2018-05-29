@@ -10,7 +10,7 @@ Done so far:
 
 	Obtain data from Jane in form of excel sheet with article info, text, label
 
-	Find a way to preprocess text
+	Preprocess text
 
 	Determine a machine learning method that would work well in this process - bag of words model Linear SVM classifier
 
@@ -18,19 +18,32 @@ Done so far:
 
 	Given articles returned using the 'school' keyword, write linear classifier to predict only whether the article is relevant to schools or not
 
--------------------------------------------------------------------------------
+	Scraper for armenpress.am english articles
+
+	Parser for some elements of armenpress.am english articles
+
+	Classifier for both labels and relevancy
+
+	Run trained classifier on this data to determine relevant articles
+
+	Determine accuracy
+
 TODO:
 
-	classify articles based on all labels, instead of just relevancy
+	scrape/parse data from other websites
 
-	scrape data from armenpress
-
-	run trained classifier on this data to determine relevant articles
-
-	find accuracy
+	parse other metadata (date, etc.)
 
 	optimize
 
 	repeat process for russian articles
 
-	repeat process for armenian articles
+	repeat process for armenian articles?
+
+Issues:
+
+Not enough training data
+So many more irrelevant articles than relevant articles that the predictor just always predicts irrelevancy - one way to resolve this is with a lot more relevant articles in the training set
+Could possibly be resolved by creating training sets by setting even proportion of relevant and irrelevant articles, but not enough data
+
+Also need to ask for articles in order to determine a theme of the paper - one potential idea could be finding keywords that are most important to relevant articles in a certain subject - maybe ask to focus on one subject for now in order to find this. Also could maybe use the presence of these keywords to further classify whether the article shows governmental good, bad, etc?

@@ -10,7 +10,7 @@ def tokenizeText(input_words):
 	
 	output_words = []
 
-	for word in input_words.split():
+	for word in str(input_words).split():
 
 		#Convert to lowercase
 		tempword = word.lower()

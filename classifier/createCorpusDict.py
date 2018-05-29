@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	#Get a concatenated object with all words
 	text = ""
 	for row in df:
-		text += row[6]
+		text += row[8]
 
 	#Preprocess
 	all_words = englishPreprocess(text)
