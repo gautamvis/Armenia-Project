@@ -34,9 +34,9 @@ def generateFeatureMatrix(article_list, corpus_dict):
 		feature_matrix[index] = article_matrix
 
 		# Add entry to label matrix
-		if article['relevant_to_armenia_label'] == 'Yes':
+		if article['Relevant'].lower() == 'Yes':
 			label_matrix[index] = 1
-		elif article['relevant_to_armenia_label'] == 'No':
+		elif article['Relevant'].lower() == 'No':
 			label_matrix[index] = 2
 
 
