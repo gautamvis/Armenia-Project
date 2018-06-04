@@ -30,6 +30,8 @@ Done so far:
 
 TODO:
 
+	FIX Scraper
+
 	scrape/parse data from other websites
 
 	parse other metadata (date, etc.)
@@ -46,4 +48,13 @@ Not enough training data
 So many more irrelevant articles than relevant articles that the predictor just always predicts irrelevancy - one way to resolve this is with a lot more relevant articles in the training set
 Could possibly be resolved by creating training sets by setting even proportion of relevant and irrelevant articles, but not enough data
 
-Also need to ask for articles in order to determine a theme of the paper - one potential idea could be finding keywords that are most important to relevant articles in a certain subject - maybe ask to focus on one subject for now in order to find this. Also could maybe use the presence of these keywords to further classify whether the article shows governmental good, bad, etc?
+Need articles in order to determine a theme of the paper - one potential idea could be finding keywords that are most important to relevant articles in a certain subject - maybe ask to focus on one subject for now in order to find this. Could also use the presence of these keywords to further classify whether the article shows governmental good, bad, etc?
+
+
+Next week:
+
+word frequencies
+readings from newspapers
+
+
+
