@@ -8,6 +8,20 @@ from bs4 import *
 from threading import Thread
 from selenium import webdriver
 
+test_urls = ["https://www.rferl.org/a/Armenia_100_Lost_Days/1186426.html",
+"https://www.rferl.org/a/Abkhazia_Bryza_Nagorno_Karabakh_Turkey_Armenia/1185188.html",
+"https://www.rferl.org/a/Armenian_President_Rules_Out_Repeat_Elections/1185167.html",
+"https://www.rferl.org/a/Armenian_President_Calls_For_Better_Ties_With_Turkey/1185120.html",
+"https://www.rferl.org/a/Football_Diplomacy_Peace/1184293.html",
+"https://www.rferl.org/a/Genocide_Question_Still_Haunts_Armenia_Turkey_Relations/1182898.html",
+"https://www.rferl.org/a/Armenia_Long_Hot_Political_Summer/1181449.html",
+"https://www.rferl.org/a/Controversial_Armenian_Parliamentary_Commission_Begins_Work/1145555.html",
+"https://www.rferl.org/a/Harsh_Rhetoric_Emerges_From_PACE_Session/1145541.html",
+"https://www.rferl.org/a/1144662.html",
+"https://www.rferl.org/a/1144660.html",
+"https://www.rferl.org/a/1144655.html",
+"https://www.rferl.org/a/1144645.html"]
+
 
 #Object to store data for each article
 class ArticleData():
