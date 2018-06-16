@@ -5,6 +5,50 @@ stopwords = []
 with open('englishstopwords.txt', 'r') as stopwordfile:
 	stopwords = stopwordfile.read()
 
+def remove_punctuation(word):
+
+	#Convert to lowercase
+	tempword = word.lower()
+
+	#Apostrophe cases 
+
+	#'let's
+	tempword = tempword.replace("let's", "let us")
+	#'are'
+	tempword = tempword.replace("'re", " are")
+	#'will'
+	tempword = tempword.replace("'ll", "  will")
+	#'have'
+	tempword = tempword.replace("'ve", " have")
+	#'would'
+	tempword = tempword.replace("'d", " would")
+	#'am'
+	tempword = tempword.replace("'m", " am")
+	#'not'
+	tempword = tempword.replace("n't", " not")
+	#'of'
+	tempword = tempword.replace("o'", "of")
+	#'are'
+	tempword = tempword.replace("y'", "you ")
+
+
+	#Periods, exclamations, question marks at the end of sentences
+	tempword = tempword.replace('.', ' ')
+	tempword = tempword.replace('?', ' ')
+	tempword = tempword.replace('!', ' ')
+	tempword = tempword.replace(',', ' ')
+
+
+	#Remove parentheses
+	tempword = tempword.replace('(', ' ')
+	tempword = tempword.replace(')', ' ')
+
+	#Remove single and double quotes
+	tempword = tempword.replace("'", '')
+	tempword = tempword.replace('"', '')
+
+	return tempword
+
 # Tokenize text with different rules
 def tokenizeText(input_words):
 	
@@ -12,45 +56,9 @@ def tokenizeText(input_words):
 
 	for word in str(input_words).split():
 
-		#Convert to lowercase
-		tempword = word.lower()
+		tempword = remove_punctuation(word)
 
-		#Apostrophe cases 
-
-		#'let's
-		tempword = tempword.replace("let's", "let us")
-		#'are'
-		tempword = tempword.replace("'re", " are")
-		#'will'
-		tempword = tempword.replace("'ll", "  will")
-		#'have'
-		tempword = tempword.replace("'ve", " have")
-		#'would'
-		tempword = tempword.replace("'d", " would")
-		#'am'
-		tempword = tempword.replace("'m", " am")
-		#'not'
-		tempword = tempword.replace("n't", " not")
-		#'of'
-		tempword = tempword.replace("o'", "of")
-		#'are'
-		tempword = tempword.replace("y'", "you ")
-
-
-		#Periods, exclamations, question marks at the end of sentences
-		tempword = tempword.replace('.', '')
-		tempword = tempword.replace('?', '')
-		tempword = tempword.replace('!', '')
-		tempword = tempword.replace(',', '')
-
-
-		#Remove parentheses
-		tempword = tempword.replace('(', '')
-		tempword = tempword.replace(')', '')
-
-		#Remove single and double quotes
-		tempword = tempword.replace("'", '')
-		tempword = tempword.replace('"', '')
+		tempword = tempword.strip()
 		
 		#Remove single periods, spaces, 
 		if tempword != '.' and tempword != ' ':

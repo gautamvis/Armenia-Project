@@ -1,5 +1,5 @@
-import sys, pandas, pickle
-from englishpreprocessor import englishPreprocess
+import sys, pandas, pickle, csv, re
+from englishpreprocessor import englishPreprocess, remove_punctuation
 
 #Create corpus dictionary
 def createCorpusDict(all_words):
@@ -14,25 +14,64 @@ def createCorpusDict(all_words):
 
 	return corpus_dict
 
+def is_ascii(input):
+    try:
+        input.decode('ascii')
+        return True
+    except:
+    	if input.find("'") == -1:
+        	return False
+        return True
+
 
 
 if __name__ == '__main__':
 
 	#Read in CSV file with articles
-	article_file = sys.argv[1]	
-	df = pandas.read_csv(article_file).values
+	num_input_files = int(sys.argv[1])
+	input_files = []
+	for i in range(num_input_files):
+		input_files.append(sys.argv[i + 2])
 
-	#Get a concatenated object with all words
+
+	# df = pandas.read_csv(article_file).values
+
+	# #Get a concatenated object with all words
+	# text = ""
+	# for row in df:
+	# 	text += row[8]
+
 	text = ""
-	for row in df:
-		text += row[8]
+	for file in input_files:
+
+		article_data = csv.DictReader(open(file))
+
+		for row in article_data:
+			#Only add relevant marked rows from rferl set
+			if row['Category']:
+				text += row['Text']	
+
+	#Remove escape characters
+	# text = re.sub('\W+',' ', text)
+	cleanText = ""
+	for word in text.split():
+		try:
+			re.sub(re.compile('<.*?>'), '', word.encode('utf-8'))
+			word = remove_punctuation(word)
+			cleanText += word + " "
+		except:
+			pass
 
 	#Preprocess
-	all_words = englishPreprocess(text)
+	all_words = englishPreprocess(cleanText)
 
 	corpus_dict = createCorpusDict(all_words)
 
-	print corpus_dict
+
+	#FIXME remove after testing
+	# print corpus_dict
+	# exit(0)
+
 
 	with open("corpus_dict.pkl", 'wb') as corpus_dict_file:
 		pickle.dump(corpus_dict, corpus_dict_file, protocol=pickle.HIGHEST_PROTOCOL)
