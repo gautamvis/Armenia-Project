@@ -42,6 +42,8 @@ def remove_punctuation(word):
 	#Remove parentheses
 	tempword = tempword.replace('(', ' ')
 	tempword = tempword.replace(')', ' ')
+	tempword = tempword.replace('[', ' ')
+	tempword = tempword.replace(']', ' ')
 
 	#Remove single and double quotes
 	tempword = tempword.replace("'", '')

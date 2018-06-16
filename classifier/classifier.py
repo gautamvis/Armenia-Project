@@ -8,14 +8,14 @@ from englishpreprocessor import englishPreprocess
 
 
 #Creates a matrix with each row representing a article and each column representing a unique word
-def generateFeatureMatrix(article_list, corpus_dict, keyword_dict):
+def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 
 	#Determine dimensions of feature matrix, populate with 0s
 	num_articles = len(article_list)
 	num_features = len(corpus_dict)
 	feature_matrix = np.zeros((num_articles, num_features))
 	relevant_label_matrix = np.zeros(num_articles)
-	keyword_label_matrix = np.zeros(num_articles)
+	category_label_matrix = np.zeros(num_articles)
 
 	#Create a row in the feature matrix for each article
 	for index,article in enumerate(article_list):
@@ -36,18 +36,18 @@ def generateFeatureMatrix(article_list, corpus_dict, keyword_dict):
 		# Add entry to label matrices
 		if article['relevant'].lower() == 'yes':
 			relevant_label_matrix[index] = 1
-			keyword_label_matrix[index] = keyword_dict[article['keyword']]
+			category_label_matrix[index] = category_dict[article['category']]
 		
 		elif article['relevant'].lower() == 'no':
 			relevant_label_matrix[index] = 2
-			keyword_label_matrix[index] = keyword_dict['junk']
+			category_label_matrix[index] = category_dict['N/A']
 
 		else:
 			print "Error with labels, index ", index, " label ", article['relevant'].lower()
 			exit(0)
 
 
-	return feature_matrix, relevant_label_matrix, keyword_label_matrix
+	return feature_matrix, relevant_label_matrix, category_label_matrix
 
 
 #Creates and fits a Linear SVM classifier, given a feature matrix, correct labels, and hyperparameter C as input
@@ -63,7 +63,7 @@ def generateClassifier(features, labels, C=.1):
 
 
 #Runs SVM classifier using 5-folding and returns how accurately the trained classifier predicts relevancy
-def runSVM(article_list, corpus_dict, keyword_dict, C):
+def runSVM(article_list, corpus_dict, category_dict, C):
 
 
 	#Total number of features
@@ -72,7 +72,7 @@ def runSVM(article_list, corpus_dict, keyword_dict, C):
 	#Select a training and testing set
 	total_test_features = []
 	total_accuracy_relevant = 0.0
-	total_accuracy_keyword = 0.0
+	total_accuracy_category = 0.0
 
 	#TODO: optimal k-folding range
 	k_fold_range = 5
@@ -83,20 +83,20 @@ def runSVM(article_list, corpus_dict, keyword_dict, C):
 		training_articles, testing_articles = getTrainTestSets(article_list, k, k_fold_range)
 		
 		#Get feature and label matrices for training data
-		train_feature_matrix, train_label_matrix_relevant, train_label_matrix_keyword = generateFeatureMatrix(training_articles, corpus_dict, keyword_dict)
+		train_feature_matrix, train_label_matrix_relevant, train_label_matrix_category = generateFeatureMatrix(training_articles, corpus_dict, category_dict)
 		
 		#Train classifiers
 		clf_relevant = generateClassifier(train_feature_matrix, train_label_matrix_relevant, C)
-		clf_keyword = generateClassifier(train_feature_matrix, train_label_matrix_keyword, C)
+		clf_category = generateClassifier(train_feature_matrix, train_label_matrix_category, C)
 
 		#Get feature and correct label matrices for test data
-		test_feature_matrix, correct_labels_relevant, correct_labels_keyword = generateFeatureMatrix(testing_articles, corpus_dict, keyword_dict)
+		test_feature_matrix, correct_labels_relevant, correct_labels_category = generateFeatureMatrix(testing_articles, corpus_dict, category_dict)
 
 		#Predict
 		num_correct_preds_relevant = 0.0
-		num_correct_preds_keyword = 0.0
+		num_correct_preds_category = 0.0
 		predictions_relevant = clf_relevant.predict(test_feature_matrix)
-		predictions_keyword = clf_keyword.predict(test_feature_matrix)
+		predictions_category = clf_category.predict(test_feature_matrix)
 
 		#Count number of correct predictions
 		for index, prediction in enumerate(predictions_relevant):
@@ -104,19 +104,19 @@ def runSVM(article_list, corpus_dict, keyword_dict, C):
 			if prediction == correct_labels_relevant[index]:
 				num_correct_preds_relevant += 1
 		
-		for index, prediction in enumerate(predictions_keyword):
+		for index, prediction in enumerate(predictions_category):
 
-			if prediction == correct_labels_keyword[index]:
-				num_correct_preds_keyword += 1
+			if prediction == correct_labels_category[index]:
+				num_correct_preds_category += 1
 	
 		accuracy_relevant = num_correct_preds_relevant / len(correct_labels_relevant)
-		accuracy_keyword = num_correct_preds_keyword / len(correct_labels_keyword)
+		accuracy_category = num_correct_preds_category / len(correct_labels_category)
 
 		total_accuracy_relevant += accuracy_relevant
-		total_accuracy_keyword += accuracy_keyword
+		total_accuracy_category += accuracy_category
 
 	
-	return total_accuracy_relevant/k_fold_range, total_accuracy_keyword/k_fold_range
+	return total_accuracy_relevant/k_fold_range, total_accuracy_category/k_fold_range
 
 #Splits input data into two sets, one to train with and one to test with
 def getTrainTestSets(article_list, k, k_fold_range):
@@ -140,55 +140,80 @@ def getTrainTestSets(article_list, k, k_fold_range):
 
 	return training_set, testing_set
 
-def storeKeywords(csv_data):
+def store_categories(category_dict, csv_data):
 
-	keyword_dict = {}
-
-	#Label junk articles as 0
-	keyword_dict['junk'] = 0
-
-	#Assign a unique integer to each keyword
-	index = 1
+	#Assign a unique integer to each category
+	index = len(category_dict)+1
 
 	for row in csv_data:
 
-		if row[0] not in keyword_dict:
+		if row['Category'] not in category_dict:
 
-			keyword_dict[row[0]] = index
+			category_dict[row['Category']] = index
 			index += 1
 
 
-	return keyword_dict
+	return category_dict
 
 
 #Main
 if __name__ == '__main__':
 
 	#Get articles from CSV
-	article_file = sys.argv[1]
-	csv_data = pandas.read_csv(article_file).values
+	num_input_files = int(sys.argv[1])
+	input_files = []
+	for i in range(num_input_files):
+		input_files.append(sys.argv[i + 2])
 	
-	
-	#Map each keyword to a unique integer (for classification)
-	keyword_dict = storeKeywords(csv_data)
 
 	article_list = []
+	category_dict = {}
 
-	#Store tokens, relevance, and keyword for each row
-	for index, row in enumerate(csv_data):
-		
-		#Incomplete information in row
-		if pandas.isnull(row[0]) or pandas.isnull(row[8]) or pandas.isnull(row[9]):
-			# print "Incomplete row: ", index
-			continue
-		if row[0] is None or row[8] is None or row[9] is None:
-			continue
+	for csv_file in input_files:
 
-		article = {}
-		article['tokens'] = englishPreprocess(row[8])
-		article['relevant'] = str(row[9])
-		article['keyword'] = str(row[0])
-		article_list.append(article)
+		#Map each category to a unique integer (for classification)
+		article_data = csv.DictReader(open(csv_file))
+		store_categories(category_dict, article_data)
+
+		#Store article data
+		article_data = csv.DictReader(open(csv_file))
+
+		#Store tokens, relevance, and category for each row
+		for row in article_data:
+
+			article = {}
+
+			#Relevant rows		
+			if row["Category"] and row["Category"] != "N/A":
+
+				article['relevant'] = 'yes'
+				article['category'] = str(row["Category"])
+				
+
+			#Only use irrelevant rows marked "N/A" to ensure proportional training data
+			elif row["Category"] == "N/A":
+
+				article['relevant'] = 'no'
+				article['category'] = "N/A"
+
+			else:
+				continue
+
+			# print row["Category"]
+			article['tokens'] = englishPreprocess(row["Text"])
+			article_list.append(article)
+
+	#FIXME remove after testing
+	# relevant_count = 0
+	# irrelevant_count = 0
+	# for article in article_list:
+	# 	if article['relevant'] == 'yes':
+	# 		relevant_count += 1
+	# 	elif article['relevant'] == 'no':
+	# 		irrelevant_count += 1
+	# print relevant_count
+	# print irrelevant_count
+	# exit(0)
 
 	#Load all unique words in corpus
 	with open("corpus_dict.pkl", 'rb') as corpus_dict_file:
@@ -198,9 +223,9 @@ if __name__ == '__main__':
 	c = 0.1
 
 	#Run SVM to predict relevance
-	accuracy_relevant, accuracy_keyword = runSVM(article_list, corpus_dict, keyword_dict, c)
+	accuracy_relevant, accuracy_category = runSVM(article_list, corpus_dict, category_dict, c)
 	
-	print "Number of unique keywords: ", len(keyword_dict)
+	print "Number of unique categorys: ", len(category_dict)
 	print "Accuracy (relevance): ", accuracy_relevant
-	print "Accuracy (keyword): ", accuracy_keyword
+	# print "Accuracy (category): ", accuracy_category
 

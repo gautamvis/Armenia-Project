@@ -33,14 +33,6 @@ if __name__ == '__main__':
 	for i in range(num_input_files):
 		input_files.append(sys.argv[i + 2])
 
-
-	# df = pandas.read_csv(article_file).values
-
-	# #Get a concatenated object with all words
-	# text = ""
-	# for row in df:
-	# 	text += row[8]
-
 	text = ""
 	for file in input_files:
 
@@ -52,7 +44,6 @@ if __name__ == '__main__':
 				text += row['Text']	
 
 	#Remove escape characters
-	# text = re.sub('\W+',' ', text)
 	cleanText = ""
 	for word in text.split():
 		try:
@@ -72,6 +63,15 @@ if __name__ == '__main__':
 	# print corpus_dict
 	# exit(0)
 
-
+	#Write dict to pkl file
 	with open("corpus_dict.pkl", 'wb') as corpus_dict_file:
 		pickle.dump(corpus_dict, corpus_dict_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+
+
+
