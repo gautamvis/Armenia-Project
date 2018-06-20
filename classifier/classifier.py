@@ -54,12 +54,14 @@ def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 def generateClassifier(features, labels, C=.1):
 
 	#Create SVM object
-	clf = LinearSVC(C=C)
+	# svc = LinearSVC(C=C)
+	clf = SVC(kernel='linear', probability=True)
 
 	#Fit to training data
 	clf.fit(features, labels)
 
 	return clf
+
 
 
 #Runs SVM classifier using 5-folding and returns how accurately the trained classifier predicts relevancy
@@ -96,7 +98,11 @@ def runSVM(article_list, corpus_dict, category_dict, C):
 		num_correct_preds_relevant = 0.0
 		num_correct_preds_category = 0.0
 		predictions_relevant = clf_relevant.predict(test_feature_matrix)
-		predictions_category = clf_category.predict(test_feature_matrix)
+		# predictions_category = clf_category.predict(test_feature_matrix)
+
+		# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
+		# print prediction_probabilities
+		# exit(0)
 
 		#Count number of correct predictions
 		for index, prediction in enumerate(predictions_relevant):
@@ -104,16 +110,16 @@ def runSVM(article_list, corpus_dict, category_dict, C):
 			if prediction == correct_labels_relevant[index]:
 				num_correct_preds_relevant += 1
 		
-		for index, prediction in enumerate(predictions_category):
+		# for index, prediction in enumerate(predictions_category):
 
-			if prediction == correct_labels_category[index]:
-				num_correct_preds_category += 1
+		# 	if prediction == correct_labels_category[index]:
+		# 		num_correct_preds_category += 1
 	
 		accuracy_relevant = num_correct_preds_relevant / len(correct_labels_relevant)
-		accuracy_category = num_correct_preds_category / len(correct_labels_category)
+		# accuracy_category = num_correct_preds_category / len(correct_labels_category)
 
 		total_accuracy_relevant += accuracy_relevant
-		total_accuracy_category += accuracy_category
+		# total_accuracy_category += accuracy_category
 
 	
 	return total_accuracy_relevant/k_fold_range, total_accuracy_category/k_fold_range
@@ -203,25 +209,15 @@ if __name__ == '__main__':
 			article['tokens'] = englishPreprocess(row["Text"])
 			article_list.append(article)
 
-	#FIXME remove after testing
-	# relevant_count = 0
-	# irrelevant_count = 0
-	# for article in article_list:
-	# 	if article['relevant'] == 'yes':
-	# 		relevant_count += 1
-	# 	elif article['relevant'] == 'no':
-	# 		irrelevant_count += 1
-	# print relevant_count
-	# print irrelevant_count
-	# exit(0)
-
+	
 	#Load all unique words in corpus
 	with open("corpus_dict.pkl", 'rb') as corpus_dict_file:
 		corpus_dict = pickle.load(corpus_dict_file)
 	
 	#TODO: optimal C value
-	c = 0.1
+	c = 10
 
+	
 	#Run SVM to predict relevance
 	accuracy_relevant, accuracy_category = runSVM(article_list, corpus_dict, category_dict, c)
 	
