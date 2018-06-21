@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 		for row in article_data:
 			#Only add relevant marked rows from rferl set
-			if row['Category']:
+			if row['Text']:
 				text += row['Text']	
 
 	#Remove escape characters

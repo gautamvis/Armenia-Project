@@ -6,7 +6,6 @@ from sklearn.metrics import accuracy_score
 from utils import *
 from englishpreprocessor import englishPreprocess
 
-
 #Creates a matrix with each row representing a article and each column representing a unique word
 def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 
@@ -26,6 +25,9 @@ def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 		for word in article['tokens']: 				       
 			if word in corpus_dict:
 				article_matrix[corpus_dict[word]] += 1
+
+			else:
+				print word
 		
 		# Normalize
 		article_matrix = article_matrix / np.linalg.norm(article_matrix)
@@ -54,8 +56,8 @@ def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 def generateClassifier(features, labels, C=.1):
 
 	#Create SVM object
-	# svc = LinearSVC(C=C)
-	clf = SVC(kernel='linear', probability=True)
+	clf = LinearSVC(C=C)
+	# clf = SVC(kernel='linear', probability=True)
 
 	#Fit to training data
 	clf.fit(features, labels)
@@ -67,16 +69,9 @@ def generateClassifier(features, labels, C=.1):
 #Runs SVM classifier using 5-folding and returns how accurately the trained classifier predicts relevancy
 def runSVM(article_list, corpus_dict, category_dict, C):
 
-
-	#Total number of features
-	num_features = len(corpus_dict)
-
-	#Select a training and testing set
-	total_test_features = []
 	total_accuracy_relevant = 0.0
 	total_accuracy_category = 0.0
 
-	#TODO: optimal k-folding range
 	k_fold_range = 5
 
 	for k in range(k_fold_range):
@@ -95,31 +90,12 @@ def runSVM(article_list, corpus_dict, category_dict, C):
 		test_feature_matrix, correct_labels_relevant, correct_labels_category = generateFeatureMatrix(testing_articles, corpus_dict, category_dict)
 
 		#Predict
-		num_correct_preds_relevant = 0.0
-		num_correct_preds_category = 0.0
-		predictions_relevant = clf_relevant.predict(test_feature_matrix)
-		# predictions_category = clf_category.predict(test_feature_matrix)
-
 		# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
 		# print prediction_probabilities
 		# exit(0)
-
-		#Count number of correct predictions
-		for index, prediction in enumerate(predictions_relevant):
-
-			if prediction == correct_labels_relevant[index]:
-				num_correct_preds_relevant += 1
-		
-		# for index, prediction in enumerate(predictions_category):
-
-		# 	if prediction == correct_labels_category[index]:
-		# 		num_correct_preds_category += 1
 	
-		accuracy_relevant = num_correct_preds_relevant / len(correct_labels_relevant)
-		# accuracy_category = num_correct_preds_category / len(correct_labels_category)
-
-		total_accuracy_relevant += accuracy_relevant
-		# total_accuracy_category += accuracy_category
+		total_accuracy_relevant += clf_relevant.score(test_feature_matrix, correct_labels_relevant)
+		total_accuracy_category += clf_category.score(test_feature_matrix, correct_labels_category)
 
 	
 	return total_accuracy_relevant/k_fold_range, total_accuracy_category/k_fold_range
@@ -147,6 +123,9 @@ def getTrainTestSets(article_list, k, k_fold_range):
 	return training_set, testing_set
 
 def store_categories(category_dict, csv_data):
+
+	if "N/A" not in category_dict:
+		category_dict["N/A"] = 0
 
 	#Assign a unique integer to each category
 	index = len(category_dict)+1
@@ -196,8 +175,8 @@ if __name__ == '__main__':
 				article['category'] = str(row["Category"])
 				
 
-			#Only use irrelevant rows marked "N/A" to ensure proportional training data
-			elif row["Category"] == "N/A":
+			#Irrelevant rows
+			elif row["Category"] in ["N/A",""]:
 
 				article['relevant'] = 'no'
 				article['category'] = "N/A"
@@ -224,4 +203,3 @@ if __name__ == '__main__':
 	print "Number of unique categorys: ", len(category_dict)
 	print "Accuracy (relevance): ", accuracy_relevant
 	# print "Accuracy (category): ", accuracy_category
-
