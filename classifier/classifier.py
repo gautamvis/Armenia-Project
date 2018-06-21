@@ -26,9 +26,6 @@ def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 			if word in corpus_dict:
 				article_matrix[corpus_dict[word]] += 1
 
-			else:
-				print word
-		
 		# Normalize
 		article_matrix = article_matrix / np.linalg.norm(article_matrix)
 
@@ -57,7 +54,6 @@ def generateClassifier(features, labels, C=.1):
 
 	#Create SVM object
 	clf = LinearSVC(C=C)
-	# clf = SVC(kernel='linear', probability=True)
 
 	#Fit to training data
 	clf.fit(features, labels)
@@ -93,7 +89,21 @@ def runSVM(article_list, corpus_dict, category_dict, C):
 		# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
 		# print prediction_probabilities
 		# exit(0)
-	
+
+		#Finds best keywords
+		#FIXME - find a better way to do this
+		# coefs = clf_category.coef_
+		# rel = []
+		# for i, coef in enumerate(coefs[1]):	
+		# 	if coef > 2:
+		# 		rel.append(i)
+		# for i, coef in enumerate(coefs[0]):
+		# 	if coef < -2:
+		# 		rel.append(i)
+		# for key in corpus_dict:
+		# 	if corpus_dict[key] in rel:
+		# 		print key
+		
 		total_accuracy_relevant += clf_relevant.score(test_feature_matrix, correct_labels_relevant)
 		total_accuracy_category += clf_category.score(test_feature_matrix, correct_labels_category)
 
@@ -132,9 +142,12 @@ def store_categories(category_dict, csv_data):
 
 	for row in csv_data:
 
-		if row['Category'] not in category_dict:
+		if row['Category'] in ["N/A","", " ", "n/a", "n/A", "N/a"]:
+			continue
 
-			category_dict[row['Category']] = index
+		if row['Category'].strip() not in category_dict:
+
+			category_dict[row['Category'].strip()] = index
 			index += 1
 
 
@@ -168,38 +181,34 @@ if __name__ == '__main__':
 
 			article = {}
 
-			#Relevant rows		
-			if row["Category"] and row["Category"] != "N/A":
-
-				article['relevant'] = 'yes'
-				article['category'] = str(row["Category"])
-				
-
 			#Irrelevant rows
-			elif row["Category"] in ["N/A",""]:
+			if row["Category"] in ["N/A","", " ", "n/a", "n/A", "N/a"]:
 
 				article['relevant'] = 'no'
 				article['category'] = "N/A"
 
+			#Relevant rows		
+			elif row["Category"]:
+
+				article['relevant'] = 'yes'
+				article['category'] = str(row["Category"]).strip()
+
 			else:
 				continue
 
-			# print row["Category"]
 			article['tokens'] = englishPreprocess(row["Text"])
 			article_list.append(article)
-
 	
 	#Load all unique words in corpus
 	with open("corpus_dict.pkl", 'rb') as corpus_dict_file:
 		corpus_dict = pickle.load(corpus_dict_file)
 	
-	#TODO: optimal C value
+	#Optimal C value	
 	c = 10
-
 	
 	#Run SVM to predict relevance
 	accuracy_relevant, accuracy_category = runSVM(article_list, corpus_dict, category_dict, c)
 	
 	print "Number of unique categorys: ", len(category_dict)
 	print "Accuracy (relevance): ", accuracy_relevant
-	# print "Accuracy (category): ", accuracy_category
+	print "Accuracy (category): ", accuracy_category

@@ -103,7 +103,15 @@ def stemWords(input_tokens):
 # Function preprocesses content and returns an ordered list of tokens
 def englishPreprocess(doc_content):
 
-	tokens = tokenizeText(doc_content)
+	cleanText = ""
+	for word in doc_content.split():
+		try:
+			re.sub(re.compile('<.*?>'), '', word.encode('utf-8'))
+			cleanText += word + " "
+		except:
+			pass
+
+	tokens = tokenizeText(cleanText)
 	without_stopwords = removeStopwords(tokens, stopwords)
 	stemmed = stemWords(tokens)
 	return stemmed

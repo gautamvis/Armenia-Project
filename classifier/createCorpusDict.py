@@ -41,27 +41,14 @@ if __name__ == '__main__':
 		for row in article_data:
 			#Only add relevant marked rows from rferl set
 			if row['Text']:
-				text += row['Text']	
+				text += " " + row['Text']	
 
-	#Remove escape characters
-	cleanText = ""
-	for word in text.split():
-		try:
-			re.sub(re.compile('<.*?>'), '', word.encode('utf-8'))
-			word = remove_punctuation(word)
-			cleanText += word + " "
-		except:
-			pass
 
 	#Preprocess
-	all_words = englishPreprocess(cleanText)
+	all_words = englishPreprocess(text)
 
 	corpus_dict = createCorpusDict(all_words)
 
-
-	#FIXME remove after testing
-	# print corpus_dict
-	# exit(0)
 
 	#Write dict to pkl file
 	with open("corpus_dict.pkl", 'wb') as corpus_dict_file:
