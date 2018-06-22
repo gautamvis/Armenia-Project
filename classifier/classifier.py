@@ -2,7 +2,7 @@ import re, os, sys, pandas, pickle, csv
 import numpy as np
 from sklearn.svm import *
 from sklearn.preprocessing import *
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score, precision_score, f1_score
 from utils import *
 from englishpreprocessor import englishPreprocess
 
@@ -50,68 +50,80 @@ def generateFeatureMatrix(article_list, corpus_dict, category_dict):
 
 
 #Creates and fits a Linear SVM classifier, given a feature matrix, correct labels, and hyperparameter C as input
-def generateClassifier(features, labels, C=.1):
+def generateClassifiers(training_articles, corpus_dict, category_dict, C=.1):
+
+	#Get feature and label matrices for training data
+	features, relevant_labels, category_labels = generateFeatureMatrix(training_articles, corpus_dict, category_dict)
 
 	#Create SVM object
-	clf = LinearSVC(C=C)
+	clf_relevant = LinearSVC(C=C)
+	clf_category = LinearSVC(C=C)
 
 	#Fit to training data
-	clf.fit(features, labels)
+	clf_relevant.fit(features, relevant_labels)
+	clf_category.fit(features, category_labels)
 
-	return clf
+	return clf_relevant, clf_category
 
 
 
 #Runs SVM classifier using 5-folding and returns how accurately the trained classifier predicts relevancy
-def runSVM(article_list, corpus_dict, category_dict, C):
+def kFoldSVM(article_list, corpus_dict, category_dict, C):
 
 	total_accuracy_relevant = 0.0
 	total_accuracy_category = 0.0
+	total_f1_relevant = 0.0
+	total_f1_category = 0.0
 
 	k_fold_range = 5
 
 	for k in range(k_fold_range):
 
 		#Obtain testing and training sets
-		training_articles, testing_articles = getTrainTestSets(article_list, k, k_fold_range)
-		
-		#Get feature and label matrices for training data
-		train_feature_matrix, train_label_matrix_relevant, train_label_matrix_category = generateFeatureMatrix(training_articles, corpus_dict, category_dict)
+		training_articles, testing_articles = getKFoldTrainTestSets(article_list, k, k_fold_range)
 		
 		#Train classifiers
-		clf_relevant = generateClassifier(train_feature_matrix, train_label_matrix_relevant, C)
-		clf_category = generateClassifier(train_feature_matrix, train_label_matrix_category, C)
+		clf_relevant, clf_category = generateClassifiers(training_articles, corpus_dict, category_dict, C)
 
 		#Get feature and correct label matrices for test data
 		test_feature_matrix, correct_labels_relevant, correct_labels_category = generateFeatureMatrix(testing_articles, corpus_dict, category_dict)
 
-		#Predict
-		# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
-		# print prediction_probabilities
-		# exit(0)
-
-		#Finds best keywords
-		#FIXME - find a better way to do this
-		# coefs = clf_category.coef_
-		# rel = []
-		# for i, coef in enumerate(coefs[1]):	
-		# 	if coef > 2:
-		# 		rel.append(i)
-		# for i, coef in enumerate(coefs[0]):
-		# 	if coef < -2:
-		# 		rel.append(i)
-		# for key in corpus_dict:
-		# 	if corpus_dict[key] in rel:
-		# 		print key
-		
 		total_accuracy_relevant += clf_relevant.score(test_feature_matrix, correct_labels_relevant)
 		total_accuracy_category += clf_category.score(test_feature_matrix, correct_labels_category)
 
+		try:
+			total_f1_relevant += f1_score(clf_relevant.predict(test_feature_matrix), correct_labels_relevant)
+			# total_f1_category += f1_score(clf_category.predict(test_feature_matrix), correct_labels_category)
+		except:
+			print "Invalid F1 Score: No true samples found"
 	
-	return total_accuracy_relevant/k_fold_range, total_accuracy_category/k_fold_range
+	
+	return total_accuracy_relevant/k_fold_range, total_accuracy_category/k_fold_range, total_f1_relevant/k_fold_range, total_f1_category/k_fold_range
+
+
+# def getPredictionProbabilities()
+	
+	#Predict
+	# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
+	# print prediction_probabilities
+	# exit(0)
+
+	#Finds best keywords
+	#FIXME - find a better way to do this
+	# coefs = clf_category.coef_
+	# rel = []
+	# for i, coef in enumerate(coefs[1]):	
+	# 	if coef > 2:
+	# 		rel.append(i)
+	# for i, coef in enumerate(coefs[0]):
+	# 	if coef < -2:
+	# 		rel.append(i)
+	# for key in corpus_dict:
+	# 	if corpus_dict[key] in rel:
+	# 		print key
 
 #Splits input data into two sets, one to train with and one to test with
-def getTrainTestSets(article_list, k, k_fold_range):
+def getKFoldTrainTestSets(article_list, k, k_fold_range):
 
 	#Define training and testing sets
 	training_set = []
@@ -153,20 +165,10 @@ def store_categories(category_dict, csv_data):
 
 	return category_dict
 
+def parseArticles(input_files, category_dict):
 
-#Main
-if __name__ == '__main__':
-
-	#Get articles from CSV
-	num_input_files = int(sys.argv[1])
-	input_files = []
-	for i in range(num_input_files):
-		input_files.append(sys.argv[i + 2])
+	train_article_list = []
 	
-
-	article_list = []
-	category_dict = {}
-
 	for csv_file in input_files:
 
 		#Map each category to a unique integer (for classification)
@@ -197,18 +199,67 @@ if __name__ == '__main__':
 				continue
 
 			article['tokens'] = englishPreprocess(row["Text"])
-			article_list.append(article)
+			train_article_list.append(article)
+
+	return train_article_list, category_dict
+
+def determineBestCValue(train_article_list, corpus_dict, category_dict):
+
+	#Run SVM to predict relevance and get best C value
+	C_vals = {.001:0, .01:0, .1:0, 1:0, 10:0, 100:0, 1000:0}
+	best_C_val = .001
+
+	for C in C_vals:	
+		predicted_accuracy_relevant, predicted_accuracy_category = kFoldSVM(train_article_list, corpus_dict, category_dict, C)
+		C_vals[C] = predicted_accuracy_relevant
+	
+	for C in C_vals:
+		if C_vals[C] > C_vals[best_C_val]:
+			best_C_val = C 
+
+	return best_C_val
+
+#Main
+if __name__ == '__main__':
+
+	#Parse articles from CSV
+	num_input_files = int(sys.argv[1])
+	input_files = []
+	for i in range(num_input_files):
+		input_files.append(sys.argv[i + 2])
+	category_dict = {}
+	train_article_list, category_dict = parseArticles(input_files, category_dict)
+	
 	
 	#Load all unique words in corpus
 	with open("corpus_dict.pkl", 'rb') as corpus_dict_file:
 		corpus_dict = pickle.load(corpus_dict_file)
 	
-	#Optimal C value	
-	c = 10
 	
-	#Run SVM to predict relevance
-	accuracy_relevant, accuracy_category = runSVM(article_list, corpus_dict, category_dict, c)
+	# best_C_val = determineBestCValue(train_article_list, corpus_dict, category_dict)
+	best_C_val  = 1
+
+	predicted_accuracy_relevant, predicted_accuracy_category, predicted_f1_relevant, predicted_f1_category = kFoldSVM(train_article_list, corpus_dict, category_dict, best_C_val)
+	print "Predicted accuracy (relevant): ", predicted_accuracy_relevant
+	print "Predicted F1 (relevant): ", predicted_f1_relevant
+
 	
-	print "Number of unique categorys: ", len(category_dict)
-	print "Accuracy (relevance): ", accuracy_relevant
-	print "Accuracy (category): ", accuracy_category
+	#Train classifiers
+	clf_relevant, clf_category = generateClassifiers(train_article_list, corpus_dict, category_dict, best_C_val)
+
+	#FIXME remove hardcode
+	test_articles, category_dict = parseArticles(["/Users/gautam/Desktop/armeniaProject/datasets/test_data.csv"], category_dict)
+
+	test_feature_matrix, relevant_labels, category_labels = generateFeatureMatrix(test_articles, corpus_dict, category_dict)
+
+	accuracy_relevant = clf_relevant.score(test_feature_matrix, relevant_labels)
+	print "Accuracy (relevant): ", accuracy_relevant
+	print "F1 (relevant): ", f1_score(clf_relevant.predict(test_feature_matrix), relevant_labels)
+			
+
+
+
+
+
+
+

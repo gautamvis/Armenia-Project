@@ -24,9 +24,8 @@ def is_ascii(input):
         return True
 
 
-
-if __name__ == '__main__':
-
+def createDict():
+	
 	#Read in CSV file with articles
 	num_input_files = int(sys.argv[1])
 	input_files = []
@@ -49,6 +48,11 @@ if __name__ == '__main__':
 
 	corpus_dict = createCorpusDict(all_words)
 
+	return corpus_dict
+
+if __name__ == '__main__':
+	
+	corpus_dict = createDict()
 
 	#Write dict to pkl file
 	with open("corpus_dict.pkl", 'wb') as corpus_dict_file:
