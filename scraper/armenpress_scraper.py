@@ -26,8 +26,8 @@ def runDriverArmenpress(category=None, num_articles=40):
 
 	# Loop for more articles
 	load_more_button = driver.find_element_by_id('morenewsbydatecontainer')
-	# for i in range(num_articles/40 - 1): 
-	# 	load_more_button.click()
+	for i in range(num_articles/40 - 1): 
+		load_more_button.click()
 
 	article_elements = driver.find_elements_by_class_name('newsbycatitem')
 
@@ -44,15 +44,9 @@ if __name__ == "__main__":
 
 	
 	#Get articles to be scraped
-	article_urls = runDriverArmenpress()
+	article_urls = runDriverArmenpress(num_articles=40)
 
 	#Save url list to pickle file
-	with open("article_urls.pkl", 'wb') as pkl_file:
+	with open("armenpress_article_urls.pkl", 'wb') as pkl_file:
 		pickle.dump(article_urls, pkl_file, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-	#TODO thread to improve speed	
-
-	#TODO: Print metrics for dataset
-
    
