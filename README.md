@@ -4,11 +4,6 @@
 
 -Fix Armenpress Scraper
 
--Print predicted probabilities
-
--Update Readme
-
-
 Tools:
 Python 2.7.15
 
@@ -17,15 +12,16 @@ Python libraries required: sklearn, pandas, numpy, bs4, requests, selenium
 Chromedriver [Download](http://chromedriver.chromium.org/)
 
 
-### Contents: 
+## Contents: 
 
-Note: All functions are run on command line, arguments needed are specified
+**Note: All functions are run on command line, arguments needed are specified**
 
-#### Scraper
+
+### Scraper
 
 Contains implementation of RFERL and Armenpress scrapers
 
-Files:
+####Files:
 
 Chromedriver (must be inside this directory to run)
 
@@ -56,7 +52,7 @@ parser.py
 	Saves trained classifier and dictionary of categories to trained_classifiers.pkl
 
 
-#### Classifier
+### Classifier
 
 Contains code to create a dictionary of unique words and to train and run classifier
 
@@ -64,7 +60,7 @@ Contains code to create a dictionary of unique words and to train and run classi
 CSV files to be classified must include headings "URL" and "Text".
 CSV files must be well formed and cannot include blank rows**
 
-Files:
+####Files:
 
 create_corpus_dict.py
 	
@@ -91,7 +87,7 @@ run_classifier.py
 	Outputs predictions, with likelihood that the article is relevant
 
 
-#### Datasets
+### Datasets
 
 Contains training datasets
 
