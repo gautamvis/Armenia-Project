@@ -23,6 +23,7 @@ def parseArticles(input_files):
 
 			article = {}
 			article['tokens'] = englishPreprocess(row["Text"])
+			article['URL'] = row["URL"]
 			article_list.append(article)
 
 	return article_list
@@ -54,12 +55,14 @@ def generateFeatureMatrix(article_list, corpus_dict):
 	return feature_matrix
 
 
-# def getPredictionProbabilities()
+def runSVM(articles, corpus_dict)
 	
-	#Predict
-	# prediction_probabilities = clf_relevant.predict_proba(test_feature_matrix)
-	# print prediction_probabilities
-	# exit(0)
+	feature_matrix = generateFeatureMatrix(articles, corpus_dict)
+
+	prediction_probabilities = clf_relevant.predict_proba(feature_matrix)
+	for i, prediction in enumerate(prediction_probabilities):
+		print articles[i]["URL"] + " " + "Likelihood of relevance: " + str(round(prediction[0],3)*100) + "%"
+
 
 
 if __name__ == '__main__':
@@ -75,17 +78,11 @@ if __name__ == '__main__':
 	with open("trained_classifiers.pkl", 'rb') as trained_clf_file:
 		clf_relevant = pickle.load(trained_clf_file)
 		clf_category = pickle.load(trained_clf_file)
-		category_dict = pickle.load(trained_clf_file)
 	with open("corpus_dict.pkl", 'rb') as corpus_dict_file:
 		corpus_dict = pickle.load(corpus_dict_file)
 	
 
-	feature_matrix = generateFeatureMatrix(test_articles, corpus_dict, category_dict)
-
-	# predictions = clf_relevant.predict(feature_matrix)
-	prediction_probabilities = clf_relevant.predict_proba(feature_matrix)
-
-
+	runSVM(articles, corpus_dict)
 
 
 

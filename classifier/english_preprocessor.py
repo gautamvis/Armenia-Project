@@ -5,7 +5,7 @@ stopwords = []
 with open('englishstopwords.txt', 'r') as stopwordfile:
 	stopwords = stopwordfile.read()
 
-def remove_punctuation(word):
+def removePunctuation(word):
 
 	#Convert to lowercase
 	tempword = word.lower()
@@ -58,7 +58,7 @@ def tokenizeText(input_words):
 
 	for word in str(input_words).split():
 
-		tempword = remove_punctuation(word)
+		tempword = removePunctuation(word)
 
 		tempword = tempword.strip()
 		

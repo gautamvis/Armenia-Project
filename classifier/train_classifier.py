@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.svm import *
 from sklearn.preprocessing import *
 from sklearn.metrics import recall_score, precision_score, f1_score
+from sklearn.calibration import CalibratedClassifierCV
 from utils import *
 from englishpreprocessor import englishPreprocess
 
@@ -56,8 +57,12 @@ def generateClassifiers(training_articles, corpus_dict, category_dict, C=.1):
 	features, relevant_labels, category_labels = generateTrainFeatureMatrix(training_articles, corpus_dict, category_dict)
 
 	#Create SVM object
-	clf_relevant = LinearSVC(C=C)
+	svm_relevant = LinearSVC(C=C)
+	svm_category = LinearSVC(C=C)
+
+	clf_relevant = CalibratedClassifierCV(svm_relevant)
 	clf_category = LinearSVC(C=C)
+	# clf_category = CalibratedClassifierCV(svm_category)
 
 	#Fit to training data
 	clf_relevant.fit(features, relevant_labels)
@@ -234,7 +239,6 @@ if __name__ == '__main__':
 	with open("trained_classifiers.pkl", 'wb') as trained_classifier_file:
 		pickle.dump(clf_relevant, trained_classifier_file, protocol=pickle.HIGHEST_PROTOCOL)
 		pickle.dump(clf_category, trained_classifier_file, protocol=pickle.HIGHEST_PROTOCOL)
-		pickle.dump(category_dict, trained_classifier_file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 
