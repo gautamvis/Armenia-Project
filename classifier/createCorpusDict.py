@@ -38,7 +38,6 @@ def createDict():
 		article_data = csv.DictReader(open(file))
 
 		for row in article_data:
-			#Only add relevant marked rows from rferl set
 			if row['Text']:
 				text += " " + row['Text']	
 

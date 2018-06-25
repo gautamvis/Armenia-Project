@@ -10,11 +10,7 @@ from selenium import webdriver
 
 
 #Get all articles on Armenia between 2004 and 2008 from RFERL
-def scrapeRFERL():
-
-	articles_2008_startpage = 212
-	articles_2004_startpage = 272
-	# articles_2004_startpage = 272
+def scrapeRFERL(startpage, endpage):
 
 	start_url = "https://www.rferl.org/z/655?p="
 
@@ -22,7 +18,7 @@ def scrapeRFERL():
 
 	all_links = []
 
-	for i in range(articles_2008_startpage, articles_2004_startpage):
+	for i in range(startpage, endpage):
 
 		driver.get(start_url + str(i))
 		
@@ -36,7 +32,10 @@ def scrapeRFERL():
 	
 if __name__ == "__main__":
 
-	all_links = scrapeRFERL()
+	startpage = int(sys.argv[1])
+	endpage = int(sys.argv[2])
+
+	all_links = scrapeRFERL(startpage, endpage)
 
 	with open("rferl_article_urls.pkl", 'wb') as pkl_file:
 		pickle.dump(all_links, pkl_file, protocol=pickle.HIGHEST_PROTOCOL)
