@@ -26,29 +26,29 @@ Chromedriver (must be inside this directory to run)
 
 *armenpress_scraper.py*
 	
-	Arguments(1): number of articles to be scraped, in multiples of 40
+Arguments(1): number of articles to be scraped, in multiples of 40
 	
 	Ex. $ python armenpress_scraper.py 40
 	
-	Saves links to armenpress_article_urls.pkl
+Saves links to armenpress_article_urls.pkl
 
 
 *rferl_scraper.py*
 	
-	Arguments(2): page to start scraping and page to end scraping. Must be in range (0-274)
+Arguments(2): page to start scraping and page to end scraping. Must be in range (0-274)
 	
 	Ex. $ python rferl_scraper.py 0 15
 	
-	Saves links to rferl_article_urls.pkl
+Saves links to rferl_article_urls.pkl
 
 
 *parser.py*
 
-	Arguments(3): website name ("rferl" or "armenpress"), path to pkl file with URLs, csv file to output 
+Arguments(3): website name ("rferl" or "armenpress"), path to pkl file with URLs, csv file to output 
 
 	Ex. $ python parser.py rferl /path/to/rferl_article_urls.pkl /path/to/rferl_output.csv
 
-	Saves trained classifier and dictionary of categories to trained_classifiers.pkl
+Saves trained classifier and dictionary of categories to trained_classifiers.pkl
 
 
 ### Classifier
