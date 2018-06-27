@@ -20,7 +20,7 @@ class ArticleData():
 		
 
 
-# Thread function takes in URL and collects article data
+# Function takes in URL and collects article data
 def parseArticlesArmenpress(article_urls, outfile):
 
 	with open(csv_file, 'wb') as outfile:
@@ -36,19 +36,20 @@ def parseArticlesArmenpress(article_urls, outfile):
 				#Parse with beautifulsoup
 				article_soup = BeautifulSoup(article_html.text, "html.parser")
 
-				#Find title and body of each article
+				#Find title date body of each article
 				title = article_soup.find(class_="opennewstitle").contents[0]
-				body = article_soup.find(itemprop="articleBody").contents[0]
+				body = ' '.join(article_soup.find(itemprop="articleBody").text.split())
+				date = article_soup.find(class_="datetime").contents[0]
+				
 				#Remove HTML tags and special characters
 				title = re.sub(re.compile('<.*?>'), '', title.encode('utf-8'))
-				title = re.sub('[^ a-zA-Z0-9]', '', title)
 				body = re.sub(re.compile('<.*?>'), '', body.encode('utf-8'))
-				body = re.sub('[^ a-zA-Z0-9]', '', body)
-				
+				date = re.sub(re.compile('<.*?>'), '', date.encode('utf-8'))				
 
-				#Add to result list
+				#write to csv
 				article = ArticleData(url, title, date, body)
 				writer.writerow([article.url, article.title, article.date, article.body])
+
 
 			except Exception as e:
 				print e
@@ -80,23 +81,21 @@ def parseArticlesRFERL(article_urls, outfile):
 				if body.find("em"):
 					body.find("em").decompose()
 				body = body.text.strip()
-
 				title = str(article_soup.find(class_="pg-title").contents[0])
 				date = str(article_soup.find("time").contents[0].strip())
-				
 				header_container = article_soup.select('div.intro.content-offset')
 				if header_container:
 					body = str(header_container[0].text) + body
-
 				title = ' '.join(title.split())
 				body = ' '.join(body.split())
 
+				#Write to csv
 				article = ArticleData(url, title, date, body)
 				writer.writerow([article.url, article.title, article.date, article.body])
 
 			except Exception as e:
 				print e, url
-				writer.writerow([url, "junk", "junk", "junk"])
+				writer.writerow([url, "junk", " ", " "])
 				pass
 
 

@@ -1,3 +1,6 @@
+# Classifier for Armenia Project
+# Gautam Visveswaran, May 2018
+
 import re, os, sys, pandas, pickle, csv
 import numpy as np
 from sklearn.svm import *

@@ -1,15 +1,14 @@
 # Armenia Project
 
-## TODO 
 
--Fix Armenpress Scraper
 
-Tools:
-Python 2.7.15
+## Requirements:
 
-Python libraries required: sklearn, pandas, numpy, bs4, requests, selenium
+[Python 2.7.15](https://www.python.org/downloads/)
 
-Chromedriver [Download](http://chromedriver.chromium.org/)
+Python libraries: sklearn, pandas, numpy, bs4, requests, selenium
+
+[Chromedriver](http://chromedriver.chromium.org/)
 
 
 ## Contents: 
@@ -21,20 +20,20 @@ Chromedriver [Download](http://chromedriver.chromium.org/)
 
 Contains implementation of RFERL and Armenpress scrapers
 
-####Files:
+#### Files:
 
 Chromedriver (must be inside this directory to run)
 
-armenpress_scraper.py
+*armenpress_scraper.py*
 	
-	Arguments(1): number of articles to be scraped 
+	Arguments(1): number of articles to be scraped, in multiples of 40
 	
-	Ex. $ python armenpress_scraper.py 50
+	Ex. $ python armenpress_scraper.py 40
 	
 	Saves links to armenpress_article_urls.pkl
 
 
-rferl_scraper.py 
+*rferl_scraper.py*
 	
 	Arguments(2): page to start scraping and page to end scraping. Must be in range (0-274)
 	
@@ -43,7 +42,7 @@ rferl_scraper.py
 	Saves links to rferl_article_urls.pkl
 
 
-parser.py
+*parser.py*
 
 	Arguments(3): website name ("rferl" or "armenpress"), path to pkl file with URLs, csv file to output 
 
@@ -56,35 +55,51 @@ parser.py
 
 Contains code to create a dictionary of unique words and to train and run classifier
 
-**Note: Train csv files must include headings "Category" and "Text". A blank is equivalent to "N/A" in the Category column. 
+Training CSV files must include headings "Category" and "Text". A blank is equivalent to "N/A" in the Category column. 
+
 CSV files to be classified must include headings "URL" and "Text".
-CSV files must be well formed and cannot include blank rows**
 
-####Files:
+Must be run in order: create_corpus_dict.py,  train_classifier.py, run_classifier.py**
 
-create_corpus_dict.py
+
+**Note: Ensure all CSV files are well formed, have no special/hidden characters in first row, and don't include blank rows**
+
+
+#### Files:
+
+*create_corpus_dict.py*
 	
-	Arguments(2+): number of input training csv files, list of training csv files
+Arguments(2+): number of input training csv files, list of training csv files
 
-	Outputs corpus_dict.pkl which contains a dictionary of all the words in the corpus	
+Outputs corpus_dict.pkl which contains a dictionary of all the words in the corpus	
 
-train_classifier.py
+*train_classifier.py*
 
-	Arguments(2+): number of input training csv files, list of training csv files
+Arguments(2+): number of input training csv files, list of training csv files
 
 	Ex. $ python train_classifer.py 2 /path/to/train_file_1.csv /path/to/train_file_2.csv
 
-	Requires corpus_dict.pkl to be in directory
+Outputs trained_classifiers.pkl
 
-	Outputs trained_classifiers.pkl
+*run_classifier.py*
 
-run_classifier.py
+Arguments(2+): number of input csv files, list of training csv files
+	
+		Ex. $ python run_classifier.py 2 /path/to/input_file_1.csv
 
-	Arguments(2+): number of input csv files, list of training csv files
+Outputs predictions, with likelihood that the article is relevant
 
-	Requires trained_classifiers.pkl to be in directory
+*english_preprocessor.py*
 
-	Outputs predictions, with likelihood that the article is relevant
+Contains functions to preprocess text from news articles before running classifier
+
+*porterstemmer.py*
+
+Contains stemmer function used for preprocessing
+
+*englishstopwords.txt*
+
+Contains stopwords used for preprocessing
 
 
 ### Datasets

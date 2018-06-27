@@ -5,7 +5,6 @@ import errno, json, os, pickle, re, shutil, string, sys, unicodedata, time, math
 import unicodecsv as csv
 from requests import get
 from bs4 import *
-from threading import Thread
 from selenium import webdriver
 
 
@@ -42,9 +41,10 @@ def runDriverArmenpress(category=None, num_articles=40):
 	
 if __name__ == "__main__":
 
+	num_articles = sys.argv[1]
 	
 	#Get articles to be scraped
-	article_urls = runDriverArmenpress(num_articles=40)
+	article_urls = runDriverArmenpress(num_articles)
 
 	#Save url list to pickle file
 	with open("armenpress_article_urls.pkl", 'wb') as pkl_file:
