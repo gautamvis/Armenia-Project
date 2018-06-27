@@ -55,7 +55,7 @@ def generateFeatureMatrix(article_list, corpus_dict):
 	return feature_matrix
 
 
-def runSVM(articles, corpus_dict)
+def runSVM(articles, corpus_dict):
 	
 	feature_matrix = generateFeatureMatrix(articles, corpus_dict)
 
